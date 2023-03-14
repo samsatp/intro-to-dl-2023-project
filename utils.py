@@ -18,7 +18,7 @@ def parse_xml(files: List[os.PathLike]):
     """
         Parameters
         ---
-        `data_path`: a list of all files to use
+        `data_path`: a list of XML file paths
 
         Returns
         ---
@@ -54,3 +54,5 @@ def parse_xml(files: List[os.PathLike]):
         codes = soup.find_all("code")
         label = [code.attrs.get("code") for code in codes]
         labels.append(label)
+
+    return headlines, texts, labels
