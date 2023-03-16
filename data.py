@@ -16,9 +16,9 @@ class Tokenizer:
 
 class MultiLabelDataset(Dataset):
     def __init__(self, 
-                 data:   List[List[str]], 
-                 labels: List[List[int]], 
-                 tokenizer):
+                 data:   List[str],       # List of text
+                 labels: List[List[int]], # List of list of labels
+                 tokenizer: Tokenizer):
         
         self.vocab = torchtext.vocab.build_vocab_from_iterator(
             data, 
