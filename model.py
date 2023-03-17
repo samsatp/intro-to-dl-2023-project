@@ -7,7 +7,8 @@ import torch.optim as optim
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 from typing import List
-from data import MultiLabelDataset
+from data import MultiLabelDataset, collate_fn, Tokenizer
+
 
 
     
@@ -51,27 +52,42 @@ def evaluate(model, criterion, test_loader):
 
 # Example usage:
 if __name__ == '__main__':
+    from utils import parse_xml
+    import glob, os
+    
     # Define the hyperparameters
     BATCH_SIZE = 32
     EMBEDDING_DIM = 100
     HIDDEN_DIM = 128
     LEARNING_RATE = 0.001
-    
     NUM_EPOCHS = 10
     
-    # Create the tokenizer
-    tokenizer = lambda x: x.split()
-    
     # Load the data
-    train_data = ["This is a positive example", "This is a negative example", "This is a neutral example"]
-    train_labels = [[1, 0, 1], [0, 1, 0], [0, 0, 1]]
-    train_dataset = MultiLabelDataset(train_data, train_labels, tokenizer)
-    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
+    files = glob.glob(os.path.join("data","sample","*"))
+    headlines, texts, labels = parse_xml(files=files)
+    X = [(a+" "+b).lower() for a,b in zip(headlines, texts)]
+
+    # Create a tokenizer
+    class TrivialTokenizer(Tokenizer):
+        def __call__(self, text: str) -> List[list]:
+            return text.split()
+    tokenizer = TrivialTokenizer()
+
+    # Build dataset & dataloader
+    train_dataset = MultiLabelDataset(X, labels, tokenizer)
+    train_loader = DataLoader(train_dataset, 
+                              batch_size=BATCH_SIZE, 
+                              shuffle=True, 
+                              collate_fn=collate_fn)
+    
     NUM_CLASSES = train_dataset.NUM_CLASSES
-    print("NUM_CLASSES =", NUM_CLASSES)
+    VOCAB_SIZE = len(train_dataset.vocab)
     
     # Create the model
-    model = MultiLabelClassifier(vocab_size=1000, embedding_dim=EMBEDDING_DIM, hidden_dim=HIDDEN_DIM, num_classes=NUM_CLASSES)
+    model = MultiLabelClassifier(vocab_size=VOCAB_SIZE, 
+                                 embedding_dim=EMBEDDING_DIM, 
+                                 hidden_dim=HIDDEN_DIM, 
+                                 num_classes=NUM_CLASSES)
     
     # Create the optimizer and loss function
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
@@ -81,4 +97,3 @@ if __name__ == '__main__':
     for epoch in range(NUM_EPOCHS):
         train_loss = train(model, optimizer, criterion, train_loader)
         print('Epoch: {}, Train Loss: {:.4f}'.format(epoch+1, train_loss))
-    
