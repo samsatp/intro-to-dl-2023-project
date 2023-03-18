@@ -7,19 +7,20 @@ from torch.utils.data import Dataset, DataLoader
 from torch.nn.utils.rnn import pad_sequence, pack_padded_sequence, PackedSequence
 
 class dtype:
-    indices = List[int]
-    batch = Tuple[indices, indices]
+    indices = torch.TensorType
+    sample = Tuple[indices, indices]
+    collate_input = List[sample]
 
 class Tokenizer:
     # Base class for implementing a tokenizer
     def __init__(self) -> None:
         pass
 
-    def __call__(self, text: str) -> List[list]:
+    def __call__(self, text: str) -> dtype.indices:
         # Tokenize a string into a list of tokens
         raise NotImplementedError
     
-def collate_fn(batch: dtype.batch) -> Tuple[PackedSequence, dtype.indices]:
+def collate_fn(batch: dtype.collate_input) -> Tuple[PackedSequence, dtype.indices]:
     """
         the collate_fn parameter is a function that defines how to 
         collate (combine) individual data samples into batches 
@@ -31,7 +32,7 @@ def collate_fn(batch: dtype.batch) -> Tuple[PackedSequence, dtype.indices]:
         shapes or types, collate_fn is used to combine them into 
         a batch with a uniform shape and type.
     """
-    xs, ys = batch
+    xs, ys = [sample[0] for sample in batch], [sample[1] for sample in batch]
 
     ## Sort the sequences by their length in a descendant order
     sorted_xs = sorted(xs ,key=lambda x:len(x), reverse=True)
@@ -39,13 +40,11 @@ def collate_fn(batch: dtype.batch) -> Tuple[PackedSequence, dtype.indices]:
 
     ## Pad the sequences in a batch to equal lengths
     padded_xs = pad_sequence(sorted_xs, batch_first=True)
-
-    ## Pack the padded sequence
-    packed_sequences = pack_padded_sequence(padded_xs, 
-                                            lengths=lengths,
-                                            batch_first=True)
-
-    return (packed_sequences, ys)
+    return {
+        "x": padded_xs,
+        "y": torch.stack(ys, 0),
+        "lengths": lengths
+    }
 
 class MultiLabelDataset(Dataset):
     def __init__(self, 

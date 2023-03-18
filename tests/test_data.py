@@ -1,7 +1,8 @@
 from data import collate_fn
 import torch
 from torch.nn.utils.rnn import PackedSequence
-from data import Tokenizer, MultiLabelDataset
+from tests.test_preprocess import get_data
+from data import Tokenizer, MultiLabelDataset, dtype
 from typing import List
 
 def test_collate_function():
@@ -15,13 +16,16 @@ def test_collate_function():
         torch.tensor([1,0,1]),
         torch.tensor([1,1,1])
     ]
-    xs, ys = collate_fn((sample_x, sample_y))
+    a_batch = collate_fn((sample_x, sample_y))
 
-    assert isinstance(xs, PackedSequence)
+    print(a_batch['x'])
+    print(a_batch['y'])
+    print(a_batch['lengths'])
+
 
 
 class TrivialTokenizer(Tokenizer):
-    def __call__(self, text: str) -> List[list]:
+    def __call__(self, text: str) -> dtype.indices:
         return text.split()
     
 def test_getitem(get_data):

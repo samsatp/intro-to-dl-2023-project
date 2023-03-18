@@ -8,7 +8,7 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 from typing import List
 from data import MultiLabelDataset, collate_fn, Tokenizer
-
+from torch.nn.utils.rnn import pack_padded_sequence, PackedSequence, pad_packed_sequence
 
 
     
@@ -16,13 +16,18 @@ class MultiLabelClassifier(nn.Module):
     def __init__(self, vocab_size, embedding_dim, hidden_dim, num_classes):
         super(MultiLabelClassifier, self).__init__()
         self.embedding = nn.Embedding(vocab_size, embedding_dim)
-        self.lstm = nn.LSTM(embedding_dim, hidden_dim, bidirectional=True)
+        self.lstm = nn.LSTM(embedding_dim, hidden_dim, bidirectional=True, batch_first=True)
         self.fc = nn.Linear(hidden_dim * 2, num_classes)
         
-    def forward(self, x):
+    def forward(self, x, lengths):
         embedded = self.embedding(x)
-        lstm_output, _ = self.lstm(embedded)
-        max_pool, _ = torch.max(lstm_output, dim=1)
+        packed_embedded = pack_padded_sequence(embedded, 
+                                                lengths=lengths,
+                                                batch_first=True)
+        lstm_output, _ = self.lstm(packed_embedded)
+        lstm_unpacked, len_unpacked = pad_packed_sequence(lstm_output, batch_first=True)
+
+        max_pool, _ = torch.max(lstm_unpacked, dim=1)
         out = self.fc(max_pool)
         out = torch.sigmoid(out)
         return out
@@ -30,11 +35,10 @@ class MultiLabelClassifier(nn.Module):
 def train(model, optimizer, criterion, train_loader):
     model.train()
     running_loss = 0.0
-    for batch_idx, (data, target) in enumerate(train_loader):
-        
+    for batch_idx, inputs in enumerate(train_loader):
         optimizer.zero_grad()
-        output = model(data)
-        loss = criterion(output, target.float())
+        output = model(inputs['x'], inputs['lengths'])
+        loss = criterion(output, inputs['y'].float())
         loss.backward()
         optimizer.step()
         running_loss += loss.item()
