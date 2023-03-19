@@ -35,8 +35,10 @@ def parse_xml(files: List[os.PathLike]):
     texts = []
     labels = []
 
-    for f in files:
-        with open(f, "r") as s:
+    for i, f in enumerate(files):
+        if i%1000 == 0:
+            print(f"\treading file: {i}")
+        with open(f, "r", encoding="ISO-8859-1") as s:
             xml = s.read()
         soup = BeautifulSoup(xml, features="xml")
 
@@ -49,10 +51,25 @@ def parse_xml(files: List[os.PathLike]):
             for t in soup.find('text').text.split('\n')
         ]).strip()
         texts.append(text)
-
+        
         # Extract code
         codes = soup.find_all("code")
         label = [code.attrs.get("code") for code in codes]
         labels.append(label)
-
+        
     return headlines, texts, labels
+
+if __name__ == "__main__":
+    data_path = os.path.join("data","*.xml")
+    files = glob.glob(data_path)
+    headlines, texts, labels = parse_xml(files)
+    
+    with open("headlines.txt", "w") as f:
+        f.writelines(headlines)
+
+    with open("texts.txt", "w") as f:
+        f.writelines(texts)
+    
+    with open("labels_2.txt", "w") as f:
+        f.writelines(['\t'.join(e)+"\n" for e in labels])
+    

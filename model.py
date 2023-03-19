@@ -67,10 +67,14 @@ if __name__ == '__main__':
     NUM_EPOCHS = 10
     
     # Load the data
-    files = glob.glob(os.path.join("data","sample","*"))
-    headlines, texts, labels = parse_xml(files=files)
-    X = [(a+" "+b).lower() for a,b in zip(headlines, texts)]
+    #files = glob.glob(os.path.join("data","*.xml"))
+    #print(f"There are {len(files)} files")
+    #headlines, texts, labels = parse_xml(files=files)
+    #X = [(a+" "+b).lower() for a,b in zip(headlines, texts)]
+    # TODO: Read data from saved text files instead
 
+
+    print("Parse done")
     # Create a tokenizer
     class TrivialTokenizer(Tokenizer):
         def __call__(self, text: str) -> List[list]:
@@ -97,6 +101,7 @@ if __name__ == '__main__':
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
     criterion = nn.BCELoss()
     
+    print("Start training")
     # Train the model
     for epoch in range(NUM_EPOCHS):
         train_loss = train(model, optimizer, criterion, train_loader)
