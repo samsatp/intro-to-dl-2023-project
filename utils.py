@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-import glob, os, re
+import glob, os, re, argparse
 
 from typing import List
 
@@ -59,17 +59,45 @@ def parse_xml(files: List[os.PathLike]):
         
     return headlines, texts, labels
 
-if __name__ == "__main__":
-    data_path = os.path.join("data","*.xml")
-    files = glob.glob(data_path)
-    headlines, texts, labels = parse_xml(files)
-    
-    with open("headlines.txt", "w") as f:
-        f.writelines(headlines)
 
-    with open("texts.txt", "w") as f:
-        f.writelines(texts)
+## TODO: Get headlines, texts, labels from the saved text files
+def get_data_from_text_files(headlines_file, texts_file, labels_file):
+
+    with open(headlines_file, "r") as f:
+        headlines = f.readlines()
+
+    with open(texts_file, "r") as f:
+        texts = f.readlines()
+
+    with open(labels_file, "r") as f:
+        labels = f.readlines()
     
-    with open("labels_2.txt", "w") as f:
-        f.writelines(['\t'.join(e)+"\n" for e in labels])
+    assert len(headlines) == len(texts)
+
+    X = [headline + " " + text for headline, text in zip(headlines, texts)]
+    y = [label.split("\t") for label in labels]
+
+    return X, y
+
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser(prog="utility")
+    parser.add_argument("-c", "--command", choices = ["parseXml"], required=True)
+    args = parser.parse_args()
+    command = args.command
+    print("command:", command)
     
+    if command == "parseXml":
+        data_path = os.path.join("data","*.xml")
+        files = glob.glob(data_path)
+        headlines, texts, labels = parse_xml(files)
+    
+        with open("headlines.txt", "w") as f:
+            f.writelines([headline + "\n" for headline in headlines])
+
+        with open("texts.txt", "w") as f:
+            f.writelines([text+"\n" for text in texts])
+    
+        with open("labels.txt", "w") as f:
+            f.writelines(['\t'.join(e)+"\n" for e in labels])
+

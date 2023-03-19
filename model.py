@@ -56,7 +56,7 @@ def evaluate(model, criterion, test_loader):
 
 # Example usage:
 if __name__ == '__main__':
-    from utils import parse_xml
+    import utils
     import glob, os
     
     # Define the hyperparameters
@@ -69,12 +69,14 @@ if __name__ == '__main__':
     # Load the data
     #files = glob.glob(os.path.join("data","*.xml"))
     #print(f"There are {len(files)} files")
-    #headlines, texts, labels = parse_xml(files=files)
+    #headlines, texts, labels = utils.parse_xml(files=files)
     #X = [(a+" "+b).lower() for a,b in zip(headlines, texts)]
-    # TODO: Read data from saved text files instead
+    # TODO: get_data_from_text_files(): read data from saved text files instead
+    
+    X, y = utils.get_data_from_text_files("data/extracted/headlines.txt", "data/extracted/texts.txt", "data/extracted/labels.txt")
+    print("Read done")
+    print("\tdata size: ", len(X))
 
-
-    print("Parse done")
     # Create a tokenizer
     class TrivialTokenizer(Tokenizer):
         def __call__(self, text: str) -> List[list]:
@@ -82,7 +84,7 @@ if __name__ == '__main__':
     tokenizer = TrivialTokenizer()
 
     # Build dataset & dataloader
-    train_dataset = MultiLabelDataset(X, labels, tokenizer)
+    train_dataset = MultiLabelDataset(X, y, tokenizer)
     train_loader = DataLoader(train_dataset, 
                               batch_size=BATCH_SIZE, 
                               shuffle=True, 
@@ -90,7 +92,9 @@ if __name__ == '__main__':
     
     NUM_CLASSES = train_dataset.NUM_CLASSES
     VOCAB_SIZE = len(train_dataset.vocab)
-    
+    print("\tNUM_CLASSES: ", NUM_CLASSES)
+    print("\tVOCAB_SIZE: ", VOCAB_SIZE)
+
     # Create the model
     model = MultiLabelClassifier(vocab_size=VOCAB_SIZE, 
                                  embedding_dim=EMBEDDING_DIM, 
