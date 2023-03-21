@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
-import glob, os, re, argparse
-
+import glob, os, re, json
+import pandas as pd
 from typing import List
 
 def preprocess_text(x: str):
@@ -58,3 +58,15 @@ def parse_xml(files: List[os.PathLike]):
         labels.append(label)
         
     return headlines, texts, labels
+
+def get_data(file, nrows):
+    # Load headlines, texts and labels
+    df = pd.read_csv(file, sep = '|', nrows=nrows)
+    df["headline"].fillna("", inplace=True)
+    df["text"].fillna("", inplace=True)
+
+    data = df["headline"].str.strip() + " " + df["text"].str.strip()
+    labels = df['label'].values
+    labels = [json.loads(item.replace("'", "\"")) for item in labels]
+
+    return data, labels

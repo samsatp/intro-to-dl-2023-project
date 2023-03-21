@@ -6,25 +6,49 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
-from typing import List
+from typing import List, Dict
 from data import MultiLabelDataset, collate_fn, Tokenizer
 from torch.nn.utils.rnn import pack_padded_sequence, PackedSequence, pad_packed_sequence
 
 
-    
-class MultiLabelClassifier(nn.Module):
-    def __init__(self, vocab_size, embedding_dim, hidden_dim, num_classes):
-        super(MultiLabelClassifier, self).__init__()
-        self.embedding = nn.Embedding(vocab_size, embedding_dim)
-        self.lstm = nn.LSTM(embedding_dim, hidden_dim, bidirectional=True, batch_first=True)
-        self.fc = nn.Linear(hidden_dim * 2, num_classes)
+class RNN(nn.Module):
+    def __init__(self, rnn_config, nn_config, NUM_CLASSES):
+        super(RNN, self).__init__()
+        self.embedding = None
+        self.rnn_config = rnn_config
+        self.rnn = None
+        self.fc = torch.nn.Linear(out_features=NUM_CLASSES, **nn_config)
+
+    def _set_RNN(self, emb_dim):
+        self.rnn_config['params']['input_size'] = emb_dim
+
+        if self.rnn_config['type'] == 'lstm':
+            self.rnn = torch.nn.LSTM(**self.rnn_config['params'])
+        elif self.rnn_config['type'] == 'gru':
+            self.rnn = torch.nn.GRU(**self.rnn_config['params'])
+        else:
+            self.rnn = torch.nn.RNN(**self.rnn_config['params'])
+
+    @classmethod
+    def from_data(cls, rnn_config, nn_config, NUM_CLASSES, vocab_size, embedding_dim):
+        model = cls(rnn_config, nn_config, NUM_CLASSES)
+        model.embedding = nn.Embedding(vocab_size, embedding_dim)
+        model._set_RNN(emb_dim=embedding_dim)
+        return model
+
+    @classmethod
+    def from_glove(cls, rnn_config, nn_config, NUM_CLASSES, glove_vectors, embedding_dim):
+        model = cls(rnn_config, nn_config, NUM_CLASSES)
+        model.embedding = torch.nn.Embedding.from_pretrained(embeddings=glove_vectors, freeze=True)
+        model._set_RNN(emb_dim=embedding_dim)
+        return model
         
     def forward(self, x, lengths):
         embedded = self.embedding(x)
         packed_embedded = pack_padded_sequence(embedded, 
                                                 lengths=lengths,
                                                 batch_first=True)
-        lstm_output, _ = self.lstm(packed_embedded)
+        lstm_output, _ = self.rnn(packed_embedded)
         lstm_unpacked, len_unpacked = pad_packed_sequence(lstm_output, batch_first=True)
 
         max_pool, _ = torch.max(lstm_unpacked, dim=1)
@@ -47,66 +71,26 @@ def train(model, optimizer, criterion, train_loader):
 def evaluate(model, criterion, test_loader):
     model.eval()
     running_loss = 0.0
+    accuracies = []
     with torch.no_grad():
-        for batch_idx, (data, target) in enumerate(test_loader):
-            output = model(data)
+        for batch_idx, batch in enumerate(test_loader):
+            inputs = batch['x']
+            target = batch['y']
+            lengths = batch['lengths']
+            output = model(inputs, lengths)
+
+            # Loss
             loss = criterion(output, target.float())
             running_loss += loss.item()
-    return running_loss / len(test_loader)
+            
+            # Accuracy
+            predictions = (output >= 0.5).float()
+            accuracy = torch.sum(predictions == target).float() / len(predictions)
+            accuracies.append(accuracy)
+    test_loss = running_loss / len(test_loader)
+    test_acc = sum(accuracies)/len(accuracies)
 
-# Example usage:
-if __name__ == '__main__':
-    import utils
-    import glob, os
-    
-    # Define the hyperparameters
-    BATCH_SIZE = 32
-    EMBEDDING_DIM = 100
-    HIDDEN_DIM = 128
-    LEARNING_RATE = 0.001
-    NUM_EPOCHS = 10
-    
-    # Load the data
-    #files = glob.glob(os.path.join("data","*.xml"))
-    #print(f"There are {len(files)} files")
-    #headlines, texts, labels = utils.parse_xml(files=files)
-    #X = [(a+" "+b).lower() for a,b in zip(headlines, texts)]
-    # TODO: get_data_from_text_files(): read data from saved text files instead
-    
-    X, y = utils.get_data_from_text_files("data/extracted/headlines.txt", "data/extracted/texts.txt", "data/extracted/labels.txt")
-    print("Read done")
-    print("\tdata size: ", len(X))
-
-    # Create a tokenizer
-    class TrivialTokenizer(Tokenizer):
-        def __call__(self, text: str) -> List[list]:
-            return text.split()
-    tokenizer = TrivialTokenizer()
-
-    # Build dataset & dataloader
-    train_dataset = MultiLabelDataset(X, y, tokenizer)
-    train_loader = DataLoader(train_dataset, 
-                              batch_size=BATCH_SIZE, 
-                              shuffle=True, 
-                              collate_fn=collate_fn)
-    
-    NUM_CLASSES = train_dataset.NUM_CLASSES
-    VOCAB_SIZE = len(train_dataset.vocab)
-    print("\tNUM_CLASSES: ", NUM_CLASSES)
-    print("\tVOCAB_SIZE: ", VOCAB_SIZE)
-
-    # Create the model
-    model = MultiLabelClassifier(vocab_size=VOCAB_SIZE, 
-                                 embedding_dim=EMBEDDING_DIM, 
-                                 hidden_dim=HIDDEN_DIM, 
-                                 num_classes=NUM_CLASSES)
-    
-    # Create the optimizer and loss function
-    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
-    criterion = nn.BCELoss()
-    
-    print("Start training")
-    # Train the model
-    for epoch in range(NUM_EPOCHS):
-        train_loss = train(model, optimizer, criterion, train_loader)
-        print('Epoch: {}, Train Loss: {:.4f}'.format(epoch+1, train_loss))
+    return dict(
+        loss = test_loss,
+        acc = test_acc
+    )

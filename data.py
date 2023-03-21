@@ -9,6 +9,7 @@ from torchtext.vocab import GloVe, vocab
 import pandas as pd
 import json
 from transformers import BertTokenizer, BertForSequenceClassification
+import utils
 
 class dtype:
     indices = torch.TensorType
@@ -68,6 +69,15 @@ class MultiLabelDataset(Dataset):
         self.data = data
         self.labels = labels
         self.tokenizer = tokenizer
+        self.VOCAB_SIZE = None
+
+    def get_metadata(self):
+        return dict(
+            index2label = self.index2label,
+            label2index = self.label2index,
+            NUM_CLASSES = self.NUM_CLASSES,
+            VOCAB_SIZE  = self.VOCAB_SIZE
+        )
         
     def __len__(self):
         return len(self.data)
@@ -128,6 +138,7 @@ class MultiLabelDataset(Dataset):
                             special_first=True
                         )
         dataset.vocab.set_default_index(dataset.vocab['<UNK>'])
+        dataset.VOCAB_SIZE = len(dataset.vocab)
         return dataset
     
     @classmethod
@@ -145,47 +156,43 @@ class MultiLabelDataset(Dataset):
         dataset.vocab.insert_token("<UNK>",0)
         dataset.vocab.insert_token("<PAD>",1)
         dataset.vocab.set_default_index(0)
+        dataset.vectors = torch.cat((torch.zeros(1, dataset.vectors.shape[1]), dataset.vectors))  # Zero vector for <UNK> token
         return dataset
     
     
 def get_dataloaders(file, 
                     vocab_from: str = "data",
-                    tokenizer: Union[str, Tokenizer] = "",
+                    tokenizer: Tokenizer = None,
                     nrows = None, 
                     train_size = 0.8, 
                     batch_size = 64):
     '''
     Get train and test dataset loaders with headlines, texts and labels.
+
+    # Parameters
+    ---
+    - `vocab_from`: default = "data"
+        - "data": build the vocab from the data
+        - "bert": use bert vocab, tokenizer, and embedding
+        - one of the `torchtext.vocab.pretrained_aliases` key: use its vocab and embedding
+    - `tokenizer`: Optional, default = None
+        - not required, if `vocab_from = bert`
+        - otherwise, required to pass an object of the Tokenizer class
     '''
-    def get_data(file, nrows):
-        # Load headlines, texts and labels
-        df = pd.read_csv(file, sep = '|', nrows=nrows)
-        df["headline"].fillna("", inplace=True)
-        df["text"].fillna("", inplace=True)
-
-        # Select the desired number of rows or all rows
-        data = df["headline"].str.strip() + " " + df["text"].str.strip()
-        labels = df['label'].values
-        labels = [json.loads(item.replace("'", "\"")) for item in labels]
-
-        return data, labels
-
     # Load the data
-    data, labels = get_data(file, nrows)
-        
-    if isinstance(tokenizer, Tokenizer):
-        if vocab_from == "data":
-            dataset = MultiLabelDataset.build_vocab_from_data(data, labels, tokenizer = tokenizer)
-        else:
-            dataset = MultiLabelDataset.build_vocab_from_pretrain_emb(data, labels, tokenizer = tokenizer, pretrained_name=vocab_from)
+    data, labels = utils.get_data(file, nrows)
+    
+    if vocab_from == "data":
+        dataset = MultiLabelDataset.build_vocab_from_data(data, labels, tokenizer = tokenizer)
         get_collate_fn = lambda: collate_fn
-
-    elif tokenizer.lower() == "bert":
+    elif vocab_from == "bert":
         tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
         dataset = MultiLabelDataset.build_with_transformer(data, labels, tokenizer = tokenizer)
         get_collate_fn = lambda: None
     else:
-        raise NotImplementedError("Tokenizer not implemented")
+        dataset = MultiLabelDataset.build_vocab_from_pretrain_emb(data, labels, tokenizer = tokenizer, pretrained_name=vocab_from)
+        get_collate_fn = lambda: collate_fn
+
 
     # Split the dataset into training and test data
     train_num = int(train_size * len(dataset))
@@ -193,4 +200,4 @@ def get_dataloaders(file,
     train_loader = DataLoader(train_dataset, batch_size, shuffle=True, collate_fn=get_collate_fn())
     test_loader = DataLoader(test_dataset, batch_size, shuffle=True, collate_fn=get_collate_fn())
     num_classes = dataset.NUM_CLASSES
-    return train_loader, test_loader, num_classes
+    return train_loader, test_loader, num_classes, dataset
