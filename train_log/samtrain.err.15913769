@@ -1,0 +1,24 @@
+The following modules were not unloaded:
+  (Use "module --force purge" to unload all):
+
+  1) csc-tools
+/var/spool/slurmd/job15913769/slurm_script: line 14: pip: command not found
+NOTE: This module uses Apptainer (Singularity). Some commands execute inside
+the container (e.g. python3, pip3).
+
+Traceback (most recent call last):
+  File "/scratch/project_2002605/sathtran/intro-to-dl-2023-project/train_rnn.py", line 67, in <module>
+    loss = train(optimizer=optimizer, criterion=criterion, model=model, train_loader=train_loader)
+  File "/scratch/project_2002605/sathtran/intro-to-dl-2023-project/model.py", line 64, in train
+    output = model(inputs['x'], inputs['lengths'])
+  File "/usr/local/lib64/python3.9/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/scratch/project_2002605/sathtran/intro-to-dl-2023-project/model.py", line 47, in forward
+    embedded = self.embedding(x)
+  File "/usr/local/lib64/python3.9/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/usr/local/lib64/python3.9/site-packages/torch/nn/modules/sparse.py", line 160, in forward
+    return F.embedding(
+  File "/usr/local/lib64/python3.9/site-packages/torch/nn/functional.py", line 2210, in embedding
+    return torch.embedding(weight, input, padding_idx, scale_grad_by_freq, sparse)
+RuntimeError: Expected all tensors to be on the same device, but found at least two devices, cuda:0 and cpu! (when checking argument for argument index in method wrapper__index_select)

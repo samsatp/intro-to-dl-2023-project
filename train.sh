@@ -2,7 +2,7 @@
 #SBATCH -n 1
 #SBATCH -p gpu
 #SBATCH -t 1:00:00
-#SBATCH --mem=5000
+#SBATCH --mem=8000
 #SBATCH --gres=gpu:v100:1
 #SBATCH -J samtrain
 #SBATCH -o train_log/samtrain.out.%j

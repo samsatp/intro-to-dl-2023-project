@@ -1,0 +1,15 @@
+Train on: cuda
+
+
+> Model name: model_1
+Training the following model config: 
+ {'from': 'data', 'rnn_config': {'type': 'rnn', 'embedding_dim': 50, 'params': {'hidden_size': 128, 'num_layers': 1}}, 'nn_config': {'in_features': 128}}
+epoch: 0	loss: 0.031
+epoch: 1	loss: 0.028
+epoch: 2	loss: 0.028
+Performance model_1: {'loss': 0.02796481762244391, 'acc': tensor(731.8298, device='cuda:0')}
+
+
+> Model name: model_2
+Training the following model config: 
+ {'from': 'glove.6B.50d', 'rnn_config': {'type': 'lstm', 'embedding_dim': 50, 'params': {'hidden_size': 128, 'num_layers': 1}}, 'nn_config': {'in_features': 128}}

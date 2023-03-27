@@ -85,7 +85,7 @@ def evaluate(model, criterion, test_loader):
             
             # Accuracy
             predictions = (output >= 0.5).float()
-            accuracy = torch.sum(predictions == target).float() / len(predictions)
+            accuracy = torch.sum(predictions == target).float() / predictions.numel()
             accuracies.append(accuracy)
     test_loss = running_loss / len(test_loader)
     test_acc = sum(accuracies)/len(accuracies)

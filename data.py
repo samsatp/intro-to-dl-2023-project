@@ -71,7 +71,7 @@ class MultiLabelDataset(Dataset):
         self.labels = labels
         self.tokenizer = tokenizer
         self.VOCAB_SIZE = None
-        self.device = None
+        self.device = device
 
     def get_metadata(self):
         return dict(
