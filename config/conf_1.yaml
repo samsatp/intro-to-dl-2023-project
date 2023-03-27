@@ -1,0 +1,36 @@
+data: data/data_sample.csv
+epoch: 3
+
+models:
+  model_1:
+    from: data
+    rnn_config:
+      type: rnn
+      embedding_dim: 50
+      params:
+        hidden_size: 128
+        num_layers: 1
+    nn_config:
+      in_features: 128
+
+  model_2:
+    from: glove.6B.50d
+    rnn_config:
+      type: lstm
+      embedding_dim: 50
+      params:
+        hidden_size: 128
+        num_layers: 1
+    nn_config:
+      in_features: 128
+
+  model_3:
+    from: glove.6B.200d
+    rnn_config:
+      type: gru
+      embedding_dim: 50
+      params:
+        hidden_size: 128
+        num_layers: 1
+    nn_config:
+      in_features: 128
