@@ -23,6 +23,9 @@ if __name__ == "__main__":
 
     df = pd.read_csv(DATA_PATH, sep="|")
     data = df["headline"].str.strip() + " " + df["text"].str.strip()
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Train on: {device}")
     
     for model_name, model_config in config["models"].items():
         print(f"\n\n> Model name: {model_name}")
@@ -31,7 +34,8 @@ if __name__ == "__main__":
         train_loader, test_loader, NUM_CLASSES, dataset = get_dataloaders(
             file=DATA_PATH,
             tokenizer=Tokenizer(),
-            vocab_from=model_config["from"]
+            vocab_from=model_config["from"],
+            device=device
         )
         VOCAB_SIZE    = len(dataset.vocab)
         rnn_config    = model_config['rnn_config']
@@ -56,8 +60,7 @@ if __name__ == "__main__":
 
         losses = []
 
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        print(f"Train on: {device}")
+        
         model.to(device)
 
         for epoch in range(EPOCH):

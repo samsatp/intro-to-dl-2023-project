@@ -55,7 +55,8 @@ class MultiLabelDataset(Dataset):
     def __init__(self, 
                  data:   List[str],       # List of text
                  labels: List[List[int]], # List of list of labels
-                 tokenizer: Tokenizer
+                 tokenizer: Tokenizer,
+                 device
                  ):
 
         # Collect the unique labels
@@ -70,6 +71,7 @@ class MultiLabelDataset(Dataset):
         self.labels = labels
         self.tokenizer = tokenizer
         self.VOCAB_SIZE = None
+        self.device = None
 
     def get_metadata(self):
         return dict(
@@ -92,13 +94,14 @@ class MultiLabelDataset(Dataset):
         indexed_bow = [int(idx in indexed_labels) for idx in range(self.NUM_CLASSES)]        
         label_tensor = torch.tensor(indexed_bow, dtype=torch.int16)
 
-        return indices_tensor, label_tensor
+        return indices_tensor.to(device=self.device), label_tensor.to(device=self.device)
     
     @classmethod
     def build_with_transformer(cls,
                                data:   List[str],       # List of text
                                labels: List[List[int]], # List of list of labels
-                               tokenizer: BertTokenizer):
+                               tokenizer: BertTokenizer,
+                               device):
         
         def __getitem__(self, idx):
             item = dict()
@@ -116,7 +119,7 @@ class MultiLabelDataset(Dataset):
         
         cls.__getitem__ = __getitem__
 
-        dataset = cls(data=data, labels=labels, tokenizer=tokenizer)
+        dataset = cls(data=data, labels=labels, tokenizer=tokenizer, device=device)
         dataset.vocab_by = "bert"
         dataset.bert_tokenizer_args = dict(max_length=32, 
                                            truncation=True, 
@@ -128,9 +131,10 @@ class MultiLabelDataset(Dataset):
     def build_vocab_from_data(cls, 
                               data:   List[str],       # List of text
                               labels: List[List[int]], # List of list of labels
-                              tokenizer: Tokenizer):
+                              tokenizer: Tokenizer,
+                              device):
         
-        dataset = cls(data=data, labels=labels, tokenizer=tokenizer)
+        dataset = cls(data=data, labels=labels, tokenizer=tokenizer, device=device)
         dataset.vocab_by = "data"
         dataset.vocab = torchtext.vocab.build_vocab_from_iterator(
                             data, 
@@ -146,9 +150,10 @@ class MultiLabelDataset(Dataset):
                                       data:   List[str],       # List of text
                                       labels: List[List[int]], # List of list of labels
                                       tokenizer: Tokenizer,
-                                      pretrained_name: str):
+                                      pretrained_name: str,
+                                      device):
         
-        dataset = cls(data=data, labels=labels, tokenizer=tokenizer)
+        dataset = cls(data=data, labels=labels, tokenizer=tokenizer, device=device)
         dataset.vocab_by = pretrained_name
         pretrained_emb = torchtext.vocab.pretrained_aliases[pretrained_name]()
         dataset.vectors = pretrained_emb.vectors
@@ -161,6 +166,7 @@ class MultiLabelDataset(Dataset):
     
     
 def get_dataloaders(file, 
+                    device,
                     vocab_from: str = "data",
                     tokenizer: Tokenizer = None,
                     nrows = None, 
@@ -183,14 +189,14 @@ def get_dataloaders(file,
     data, labels = utils.get_data(file, nrows)
     
     if vocab_from == "data":
-        dataset = MultiLabelDataset.build_vocab_from_data(data, labels, tokenizer = tokenizer)
+        dataset = MultiLabelDataset.build_vocab_from_data(data, labels, tokenizer = tokenizer, device=device)
         get_collate_fn = lambda: collate_fn
     elif vocab_from == "bert":
         tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-        dataset = MultiLabelDataset.build_with_transformer(data, labels, tokenizer = tokenizer)
+        dataset = MultiLabelDataset.build_with_transformer(data, labels, tokenizer = tokenizer, device=device)
         get_collate_fn = lambda: None
     else:
-        dataset = MultiLabelDataset.build_vocab_from_pretrain_emb(data, labels, tokenizer = tokenizer, pretrained_name=vocab_from)
+        dataset = MultiLabelDataset.build_vocab_from_pretrain_emb(data, labels, tokenizer = tokenizer, pretrained_name=vocab_from, device=device)
         get_collate_fn = lambda: collate_fn
 
 

@@ -28,7 +28,7 @@ models:
     from: glove.6B.200d
     rnn_config:
       type: gru
-      embedding_dim: 50
+      embedding_dim: 200
       params:
         hidden_size: 128
         num_layers: 1
