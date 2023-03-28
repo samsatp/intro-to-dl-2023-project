@@ -90,16 +90,16 @@ def evaluate(model, criterion, test_loader):
             # Accuracy
             predictions = (output >= 0.5).float()
             accuracy = torch.sum(predictions == target).float() / predictions.numel()
-            accuracies.append(accuracy)
+            accuracies.append(accuracy.cpu())
 
             y_pred_binary = predictions.int()
-            y_preds.append(y_pred_binary)
-            y_trues.append(target)
+            y_preds.append(y_pred_binary.cpu())
+            y_trues.append(target.cpu())
     
     y_preds = torch.cat(y_preds)
     y_trues = torch.cat(y_trues)
 
-    test_loss = np.mean(running_loss)
+    test_loss = np.median(running_loss)
     test_acc = np.mean(accuracies)
     precisions_micro = precision_score(y_trues, y_preds, average='micro')
     precisions_macro = precision_score(y_trues, y_preds, average='macro')
