@@ -9,7 +9,8 @@ from torch.utils.data import Dataset, DataLoader
 from typing import List, Dict
 from data import MultiLabelDataset, collate_fn, Tokenizer
 from torch.nn.utils.rnn import pack_padded_sequence, PackedSequence, pad_packed_sequence
-
+from sklearn.metrics import precision_score, recall_score, f1_score, classification_report
+import numpy as np
 
 class RNN(nn.Module):
     def __init__(self, rnn_config, nn_config, NUM_CLASSES):
@@ -72,6 +73,9 @@ def evaluate(model, criterion, test_loader):
     model.eval()
     running_loss = 0.0
     accuracies = []
+    y_preds = []   # For binary predictions of all batches in the test set
+    y_trues = []   # For binary true values of all batches in the test set
+
     with torch.no_grad():
         for batch_idx, batch in enumerate(test_loader):
             inputs = batch['x']
@@ -87,10 +91,29 @@ def evaluate(model, criterion, test_loader):
             predictions = (output >= 0.5).float()
             accuracy = torch.sum(predictions == target).float() / predictions.numel()
             accuracies.append(accuracy)
-    test_loss = running_loss / len(test_loader)
-    test_acc = sum(accuracies)/len(accuracies)
 
+            y_pred_binary = predictions.int()
+            y_preds.append(y_pred_binary)
+            y_trues.append(target)
+    
+    y_preds = torch.cat(y_preds)
+    y_trues = torch.cat(y_trues)
+
+    test_loss = np.mean(running_loss)
+    test_acc = np.mean(accuracies)
+    precisions_micro = precision_score(y_trues, y_preds, average='micro')
+    precisions_macro = precision_score(y_trues, y_preds, average='macro')
+    recalls_micro = recall_score(y_trues, y_preds, average='micro')
+    recalls_macro = recall_score(y_trues, y_preds, average='macro')
+    f1s_micro = f1_score(y_trues, y_preds, average='micro')
+    f1s_macro = f1_score(y_trues, y_preds, average='macro')
     return dict(
         loss = test_loss,
-        acc = test_acc
+        acc = test_acc,
+        precision_micro_avg = precisions_micro,
+        precision_macro_avg = precisions_macro,
+        recall_micro_avg = recalls_micro,
+        recall_macro_avg = recalls_macro,
+        f1_micro_avg = f1s_micro,
+        f1_macro_avg = f1s_macro
     )
