@@ -207,3 +207,36 @@ def get_dataloaders(file,
     test_loader = DataLoader(test_dataset, batch_size, shuffle=True, collate_fn=get_collate_fn())
     num_classes = dataset.NUM_CLASSES
     return train_loader, test_loader, num_classes, dataset
+
+def get_datasets(file, 
+                device,
+                vocab_from: str = "data",
+                tokenizer: Tokenizer = None,
+                nrows = None, 
+                train_size = 0.6,
+                val_size = 0.2):
+    '''
+    Same as get_dataloaders but returns the actual datasets and also a validation set.
+    '''
+    # Load the data
+    data, labels = utils.get_data(file, nrows)
+    
+    if vocab_from == "data":
+        dataset = MultiLabelDataset.build_vocab_from_data(data, labels, tokenizer = tokenizer, device=device)
+        get_collate_fn = lambda: collate_fn
+    elif vocab_from == "bert":
+        tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+        dataset = MultiLabelDataset.build_with_transformer(data, labels, tokenizer = tokenizer, device=device)
+        get_collate_fn = lambda: None
+    else:
+        dataset = MultiLabelDataset.build_vocab_from_pretrain_emb(data, labels, tokenizer = tokenizer, pretrained_name=vocab_from, device=device)
+        get_collate_fn = lambda: collate_fn
+
+
+    # Split the dataset into training and test data
+    train_num = int(train_size * len(dataset))
+    val_num = int(val_size * len(dataset))
+    train_dataset, val_dataset, test_dataset = random_split(dataset, [train_num, val_num, len(dataset) - train_num - val_num])
+    num_classes = dataset.NUM_CLASSES
+    return train_dataset, val_dataset, test_dataset, num_classes
+
