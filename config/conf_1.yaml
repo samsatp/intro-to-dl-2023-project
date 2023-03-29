@@ -1,12 +1,12 @@
 data: data.csv
-epoch: 3
+epoch: 20
 
 models:
   model_1:
     from: data
     rnn_config:
       type: rnn
-      embedding_dim: 50
+      embedding_dim: 200
       params:
         hidden_size: 128
         num_layers: 1

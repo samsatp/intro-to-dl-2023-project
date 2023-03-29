@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -n 1
 #SBATCH -p gpu
-#SBATCH -t 1:00:00
+#SBATCH -t 5:00:00
 #SBATCH --mem=8000
 #SBATCH --gres=gpu:v100:1
 #SBATCH -J samtrain
