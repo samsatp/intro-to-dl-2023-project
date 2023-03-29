@@ -17,8 +17,10 @@ class RNN(nn.Module):
         super(RNN, self).__init__()
         self.embedding = None
         self.rnn_config = rnn_config
+        self.nn_config = nn_config
         self.rnn = None
-        self.fc = torch.nn.Linear(out_features=NUM_CLASSES, **nn_config)
+        self.NUM_CLASSES = NUM_CLASSES
+        self.D = None # 2 if bidirectional=True otherwise 1
 
     def _set_RNN(self, emb_dim):
         self.rnn_config['params']['input_size'] = emb_dim
@@ -30,11 +32,18 @@ class RNN(nn.Module):
         else:
             self.rnn = torch.nn.RNN(**self.rnn_config['params'])
 
+        self.D = 2 if self.rnn_config['params']['bidirectional'] else 1
+
+    def _set_Linear(self):
+        self.fc = torch.nn.Linear(in_features=self.D * self.nn_config["in_features"], 
+                                  out_features=self.NUM_CLASSES)
+
     @classmethod
     def from_data(cls, rnn_config, nn_config, NUM_CLASSES, vocab_size, embedding_dim):
         model = cls(rnn_config, nn_config, NUM_CLASSES)
         model.embedding = nn.Embedding(vocab_size, embedding_dim)
         model._set_RNN(emb_dim=embedding_dim)
+        model._set_Linear()
         return model
 
     @classmethod
@@ -42,6 +51,7 @@ class RNN(nn.Module):
         model = cls(rnn_config, nn_config, NUM_CLASSES)
         model.embedding = torch.nn.Embedding.from_pretrained(embeddings=glove_vectors, freeze=True)
         model._set_RNN(emb_dim=embedding_dim)
+        model._set_Linear()
         return model
         
     def forward(self, x, lengths):

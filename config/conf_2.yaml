@@ -1,5 +1,5 @@
 data: data.csv
-epoch: 20
+epoch: 1
 
 models:
   model_1:
@@ -9,7 +9,8 @@ models:
       embedding_dim: 200
       params:
         hidden_size: 128
-        num_layers: 1
+        num_layers: 2
+        bidirectional: True
     nn_config:
       in_features: 128
 
@@ -20,7 +21,8 @@ models:
       embedding_dim: 50
       params:
         hidden_size: 128
-        num_layers: 1
+        num_layers: 2
+        bidirectional: True
     nn_config:
       in_features: 128
 
@@ -31,6 +33,7 @@ models:
       embedding_dim: 200
       params:
         hidden_size: 128
-        num_layers: 1
+        num_layers: 2
+        bidirectional: True
     nn_config:
       in_features: 128

@@ -1,0 +1,9 @@
+The following modules were not unloaded:
+  (Use "module --force purge" to unload all):
+
+  1) csc-tools
+/var/spool/slurmd/job15929482/slurm_script: line 14: pip: command not found
+NOTE: This module uses Apptainer (Singularity). Some commands execute inside
+the container (e.g. python3, pip3).
+
+slurmstepd: error: *** JOB 15929482 ON r18g04 CANCELLED AT 2023-03-28T21:03:35 DUE TO TIME LIMIT ***
