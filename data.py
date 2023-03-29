@@ -107,7 +107,7 @@ class MultiLabelDataset(Dataset):
             item = dict()
             # Create indices vector for headlines and texts
             encoded_texts = self.tokenizer(self.data[idx], **self.bert_tokenizer_args)
-            item['texts'] = encoded_texts['input_ids'][0]
+            item['input_ids'] = encoded_texts['input_ids'][0]
             item['attention_mask'] = encoded_texts['attention_mask'][0]
 
             # Convert the indexed labels to a PyTorch tensor
@@ -121,9 +121,9 @@ class MultiLabelDataset(Dataset):
 
         dataset = cls(data=data, labels=labels, tokenizer=tokenizer, device=device)
         dataset.vocab_by = "bert"
-        dataset.bert_tokenizer_args = dict(max_length=32, 
+        dataset.bert_tokenizer_args = dict(max_length=512, 
                                            truncation=True, 
-                                           padding=True, 
+                                           padding='max_length', 
                                            return_tensors="pt")
         return dataset
     
@@ -238,5 +238,4 @@ def get_datasets(file,
     val_num = int(val_size * len(dataset))
     train_dataset, val_dataset, test_dataset = random_split(dataset, [train_num, val_num, len(dataset) - train_num - val_num])
     num_classes = dataset.NUM_CLASSES
-    return train_dataset, val_dataset, test_dataset, num_classes
-
+    return train_dataset, val_dataset, test_dataset, num_classes, dataset
