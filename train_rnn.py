@@ -32,6 +32,8 @@ if __name__ == "__main__":
 
     DATA_PATH = config["data"]
     EPOCH = config["epoch"]
+    LOSS_THRESH = 0.001
+    EARLY_STOP_AT = 3
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Train on: {device}")
@@ -75,13 +77,19 @@ if __name__ == "__main__":
         criterion = nn.BCELoss()
 
         losses = []
-
+        early_stop_counter = 0
         
         model.to(device)
 
         for epoch in range(EPOCH):
             loss = train(optimizer=optimizer, criterion=criterion, model=model, train_loader=train_loader)
             print(f"epoch: {epoch}\tloss: {loss:.3f}")
+            if losses[-1] - loss <= LOSS_THRESH:
+                early_stop_counter += 1
+            else:
+                early_stop_counter = 0
+            if early_stop_counter == EARLY_STOP_AT:
+                break
             losses.append(loss)
 
         # Test
