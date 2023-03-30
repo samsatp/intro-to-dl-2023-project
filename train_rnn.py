@@ -84,7 +84,7 @@ if __name__ == "__main__":
         for epoch in range(EPOCH):
             loss = train(optimizer=optimizer, criterion=criterion, model=model, train_loader=train_loader)
             print(f"epoch: {epoch}\tloss: {loss:.3f}")
-            if losses[-1] - loss <= LOSS_THRESH:
+            if len(losses) > 0 and losses[-1] - loss <= LOSS_THRESH:
                 early_stop_counter += 1
             else:
                 early_stop_counter = 0
@@ -97,5 +97,7 @@ if __name__ == "__main__":
         print(f"Performance {model_name}: {performance}")
 
         perf_json[model_name] = performance
+
+        torch.save(model, f"{model_name}.model")
 
     print(perf_json)
