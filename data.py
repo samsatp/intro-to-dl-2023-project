@@ -139,7 +139,8 @@ class MultiLabelDataset(Dataset):
         dataset.vocab = torchtext.vocab.build_vocab_from_iterator(
                             data, 
                             specials=['<PAD>', '<UNK>'], 
-                            special_first=True
+                            special_first=True,
+                            min_freq=100
                         )
         dataset.vocab.set_default_index(dataset.vocab['<UNK>'])
         dataset.VOCAB_SIZE = len(dataset.vocab)
