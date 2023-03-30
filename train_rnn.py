@@ -6,6 +6,7 @@ import yaml
 import sys
 import pandas as pd
 from nltk.tokenize import word_tokenize
+import warnings
 
 from model import *
 from data import *
@@ -32,13 +33,10 @@ if __name__ == "__main__":
     DATA_PATH = config["data"]
     EPOCH = config["epoch"]
 
-    # Read data and preprocess
-    df = pd.read_csv(DATA_PATH, sep="|")
-    data = preprocess_text_series(df["headline"]) + " " + preprocess_text_series(df["text"])
-
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Train on: {device}")
     
+    perf_json = {}
 
     # For each model, train and evaluate it
     for model_name, model_config in config["models"].items():
@@ -56,19 +54,23 @@ if __name__ == "__main__":
         nn_config     = model_config['nn_config']
         embedding_dim = rnn_config['embedding_dim']
 
-        if model_config['from'] == 'data':
-            model = RNN.from_data(rnn_config=rnn_config, 
-                      nn_config=nn_config, 
-                      NUM_CLASSES=NUM_CLASSES,
-                      vocab_size=VOCAB_SIZE,
-                      embedding_dim=embedding_dim)
-            
-        else:
-            model = RNN.from_glove(rnn_config=rnn_config,
-                                nn_config=nn_config,
-                                NUM_CLASSES=NUM_CLASSES,
-                                glove_vectors=dataset.vectors,
-                                embedding_dim=embedding_dim)
+        try:
+            if model_config['from'] == 'data':
+                model = RNN.from_data(rnn_config=rnn_config, 
+                        nn_config=nn_config, 
+                        NUM_CLASSES=NUM_CLASSES,
+                        vocab_size=VOCAB_SIZE,
+                        embedding_dim=embedding_dim)
+                
+            else:
+                model = RNN.from_glove(rnn_config=rnn_config,
+                                    nn_config=nn_config,
+                                    NUM_CLASSES=NUM_CLASSES,
+                                    glove_vectors=dataset.vectors,
+                                    embedding_dim=embedding_dim)
+        except Exception as e:
+            warnings.warn(f"Model built failed: { model_name } \n {model_config}")
+            continue
         optimizer = torch.optim.Adam(params=model.parameters())
         criterion = nn.BCELoss()
 
@@ -85,3 +87,7 @@ if __name__ == "__main__":
         # Test
         performance = evaluate(model=model, criterion=criterion, test_loader=test_loader)
         print(f"Performance {model_name}: {performance}")
+
+        perf_json[model_name] = performance
+
+    print(perf_json)
