@@ -59,10 +59,10 @@ class RNN(nn.Module):
         packed_embedded = pack_padded_sequence(embedded, 
                                                 lengths=lengths,
                                                 batch_first=True)
-        lstm_output, _ = self.rnn(packed_embedded)
-        lstm_unpacked, len_unpacked = pad_packed_sequence(lstm_output, batch_first=True)
+        rnn_output, _ = self.rnn(packed_embedded)
+        rnn_unpacked, len_unpacked = pad_packed_sequence(rnn_output, batch_first=True)
 
-        max_pool, _ = torch.max(lstm_unpacked, dim=1)
+        max_pool, _ = torch.max(rnn_unpacked, dim=1)
         out = self.fc(max_pool)
         out = torch.sigmoid(out)
         return out
