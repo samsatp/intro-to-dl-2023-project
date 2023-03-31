@@ -14,6 +14,11 @@ def preprocess_text(x: str):
 
     return x
 
+def preprocess_text_series(text: pd.Series):
+    text = text.str.lower()
+    text = text.str.strip()
+    return text
+
 def parse_xml(files: List[os.PathLike]):
     """
         Parameters
@@ -59,13 +64,16 @@ def parse_xml(files: List[os.PathLike]):
         
     return headlines, texts, labels
 
-def get_data(file, nrows):
+def get_data(file, nrows=None):
     # Load headlines, texts and labels
     df = pd.read_csv(file, sep = '|', nrows=nrows)
-    df["headline"].fillna("", inplace=True)
-    df["text"].fillna("", inplace=True)
-
-    data = df["headline"].str.strip() + " " + df["text"].str.strip()
+    if "headline" in df.columns:
+        df["headline"].fillna("", inplace=True)
+        df["text"].fillna("", inplace=True)
+        data = preprocess_text_series(df["headline"]) + " " + preprocess_text_series(df["text"])
+    else:
+        data = preprocess_text_series(df["text"])
+    
     labels = df['label'].values
     labels = [json.loads(item.replace("'", "\"")) for item in labels]
 

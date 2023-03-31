@@ -14,11 +14,6 @@ from utils import *
 
 all_models = ["data"] + list(torchtext.vocab.pretrained_aliases.keys()) 
 
-def preprocess_text_series(text: pd.Series):
-    text = text.str.lower()
-    text = text.str.strip()
-    return text
-
 class Nltk_tok(Tokenizer):
     def __call__(self, text: str) -> List[str]:
         return word_tokenize(text)
