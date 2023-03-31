@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -n 1
 #SBATCH -p gpu
-#SBATCH -t 5:00:00
+#SBATCH -t 24:00:00
 #SBATCH --mem=8000
 #SBATCH --gres=gpu:v100:1
 #SBATCH -J samtrain
@@ -11,6 +11,8 @@
 #SBATCH
 
 module purge
-pip install -r requirements.linux.txt
+cat requirements.txt | xargs -n 1 pip install
 module load pytorch/1.13
-python train_rnn.py config/conf_1.yaml
+
+conf_file=$1
+python train_rnn.py $conf_file

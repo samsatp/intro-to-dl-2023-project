@@ -40,10 +40,15 @@ if __name__ == "__main__":
     
     perf_json = {}
 
+    str_output = ""
+
     # For each model, train and evaluate it
     for model_name, model_config in config["models"].items():
-        print(f"\n\n> Model name: {model_name}")
-        print(f"Training the following model config: \n {model_config}")
+        if os.path.exists(f"{model_name}.model"):
+            print(f"skip: {model_name}")
+            continue
+        str_output += f"\n\n> Model name: {model_name}\n"
+        str_output += f"Training the following model config: \n {model_config}\n"
 
         train_loader, test_loader, NUM_CLASSES, dataset = get_dataloaders(
             file=DATA_PATH,
@@ -83,7 +88,7 @@ if __name__ == "__main__":
 
         for epoch in range(EPOCH):
             loss = train(optimizer=optimizer, criterion=criterion, model=model, train_loader=train_loader)
-            print(f"epoch: {epoch}\tloss: {loss:.3f}")
+            str_output += f"epoch: {epoch}\tloss: {loss:.3f}\n"
             if len(losses) > 0 and losses[-1] - loss <= LOSS_THRESH:
                 early_stop_counter += 1
             else:
@@ -94,10 +99,16 @@ if __name__ == "__main__":
 
         # Test
         performance = evaluate(model=model, criterion=criterion, test_loader=test_loader)
-        print(f"Performance {model_name}: {performance}")
+        
+
+
+        str_output += f"Performance {model_name}: {performance}\n"
 
         perf_json[model_name] = performance
 
         torch.save(model, f"{model_name}.model")
+
+        with open(f"{model_name}.txt","w") as f:
+            f.write(str_output)
 
     print(perf_json)
