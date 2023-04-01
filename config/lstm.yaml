@@ -1,4 +1,4 @@
-data: data.csv
+data: new_data.csv
 epoch: 10
 
 models:

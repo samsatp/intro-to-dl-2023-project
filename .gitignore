@@ -6,3 +6,7 @@ venv
 *.txt
 *.pt
 data.csv
+models
+train_log
+*.csv
+*.model

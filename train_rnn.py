@@ -89,6 +89,7 @@ if __name__ == "__main__":
             else:
                 early_stop_counter = 0
             if early_stop_counter == EARLY_STOP_AT:
+                str_output += f"Early stop at epoch: {epoch}\n"
                 break
             losses.append(loss)
 
