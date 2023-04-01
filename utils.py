@@ -73,8 +73,10 @@ def get_data(file, nrows=None):
         data = preprocess_text_series(df["headline"]) + " " + preprocess_text_series(df["text"])
     else:
         data = preprocess_text_series(df["text"])
-    
-    labels = df['label'].values
-    labels = [json.loads(item.replace("'", "\"")) for item in labels]
+
+    labels = None
+    if 'label' in df.columns:
+        labels = df['label'].values
+        labels = [json.loads(item.replace("'", "\"")) for item in labels]
 
     return data, labels
