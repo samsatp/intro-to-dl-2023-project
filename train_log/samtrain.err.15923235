@@ -1,0 +1,21 @@
+The following modules were not unloaded:
+  (Use "module --force purge" to unload all):
+
+  1) csc-tools
+/var/spool/slurmd/job15923235/slurm_script: line 14: pip: command not found
+NOTE: This module uses Apptainer (Singularity). Some commands execute inside
+the container (e.g. python3, pip3).
+
+Traceback (most recent call last):
+  File "/scratch/project_2002605/sathtran/intro-to-dl-2023-project/train_rnn.py", line 72, in <module>
+    performance = evaluate(model=model, criterion=criterion, test_loader=test_loader)
+  File "/scratch/project_2002605/sathtran/intro-to-dl-2023-project/model.py", line 103, in evaluate
+    test_acc = np.mean(accuracies)
+  File "<__array_function__ internals>", line 180, in mean
+  File "/usr/local/lib64/python3.9/site-packages/numpy/core/fromnumeric.py", line 3432, in mean
+    return _methods._mean(a, axis=axis, dtype=dtype,
+  File "/usr/local/lib64/python3.9/site-packages/numpy/core/_methods.py", line 164, in _mean
+    arr = asanyarray(a)
+  File "/usr/local/lib64/python3.9/site-packages/torch/_tensor.py", line 955, in __array__
+    return self.numpy()
+TypeError: can't convert cuda:0 device type tensor to numpy. Use Tensor.cpu() to copy the tensor to host memory first.

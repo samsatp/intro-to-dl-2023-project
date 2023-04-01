@@ -1,3 +1,12 @@
 venv
 .pytest_cache
+.vector_cache
 **/__pycache__
+**/*.zip
+*.txt
+*.pt
+data.csv
+models
+train_log
+*.csv
+*.model

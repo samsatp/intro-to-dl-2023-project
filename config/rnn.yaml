@@ -1,0 +1,147 @@
+data: new_data.csv
+epoch: 10
+
+models:
+  rnn_data_F_1:
+    from: data
+    rnn_config:
+      type: rnn
+      embedding_dim: 200
+      params:
+        hidden_size: 128
+        num_layers: 1
+        bidirectional: False
+    nn_config:
+      in_features: 128
+
+  rnn_data_T_1:
+    from: data
+    rnn_config:
+      type: rnn
+      embedding_dim: 200
+      params:
+        hidden_size: 128
+        num_layers: 1
+        bidirectional: True
+    nn_config:
+      in_features: 128
+
+  rnn_data_F_2:
+    from: data
+    rnn_config:
+      type: rnn
+      embedding_dim: 200
+      params:
+        hidden_size: 128
+        num_layers: 2
+        bidirectional: False
+    nn_config:
+      in_features: 128
+
+  rnn_data_T_2:
+    from: data
+    rnn_config:
+      type: rnn
+      embedding_dim: 50
+      params:
+        hidden_size: 128
+        num_layers: 2
+        bidirectional: True
+    nn_config:
+      in_features: 128
+
+  rnn_G200_F_1:
+    from: glove.6B.200d
+    rnn_config:
+      type: rnn
+      embedding_dim: 200
+      params:
+        hidden_size: 128
+        num_layers: 1
+        bidirectional: False
+    nn_config:
+      in_features: 128
+
+  rnn_G200_F_2:
+    from: glove.6B.200d
+    rnn_config:
+      type: rnn
+      embedding_dim: 200
+      params:
+        hidden_size: 128
+        num_layers: 2
+        bidirectional: False
+    nn_config:
+      in_features: 128
+
+  rnn_G200_T_1:
+    from: glove.6B.200d
+    rnn_config:
+      type: rnn
+      embedding_dim: 200
+      params:
+        hidden_size: 128
+        num_layers: 1
+        bidirectional: True
+    nn_config:
+      in_features: 128
+
+  rnn_G200_T_2:
+    from: glove.6B.200d
+    rnn_config:
+      type: rnn
+      embedding_dim: 200
+      params:
+        hidden_size: 128
+        num_layers: 2
+        bidirectional: True
+    nn_config:
+      in_features: 128
+
+  rnn_G50_F_1:
+    from: glove.6B.50d
+    rnn_config:
+      type: rnn
+      embedding_dim: 50
+      params:
+        hidden_size: 128
+        num_layers: 1
+        bidirectional: False
+    nn_config:
+      in_features: 128
+
+  rnn_G50_F_2:
+    from: glove.6B.50d
+    rnn_config:
+      type: rnn
+      embedding_dim: 50
+      params:
+        hidden_size: 128
+        num_layers: 2
+        bidirectional: False
+    nn_config:
+      in_features: 128
+
+  rnn_G50_T_1:
+    from: glove.6B.50d
+    rnn_config:
+      type: rnn
+      embedding_dim: 50
+      params:
+        hidden_size: 128
+        num_layers: 1
+        bidirectional: True
+    nn_config:
+      in_features: 128
+
+  rnn_G50_T_2:
+    from: glove.6B.50d
+    rnn_config:
+      type: rnn
+      embedding_dim: 50
+      params:
+        hidden_size: 128
+        num_layers: 2
+        bidirectional: True
+    nn_config:
+      in_features: 128

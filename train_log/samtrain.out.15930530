@@ -1,0 +1,79 @@
+Train on: cuda
+
+
+> Model name: model_1
+Training the following model config: 
+ {'from': 'data', 'rnn_config': {'type': 'rnn', 'embedding_dim': 200, 'params': {'hidden_size': 128, 'num_layers': 1}}, 'nn_config': {'in_features': 128}}
+epoch: 0	loss: 0.030
+epoch: 1	loss: 0.028
+epoch: 2	loss: 0.028
+epoch: 3	loss: 0.028
+epoch: 4	loss: 0.028
+epoch: 5	loss: 0.028
+epoch: 6	loss: 0.028
+epoch: 7	loss: 0.028
+epoch: 8	loss: 0.028
+epoch: 9	loss: 0.028
+epoch: 10	loss: 0.028
+epoch: 11	loss: 0.028
+epoch: 12	loss: 0.028
+epoch: 13	loss: 0.028
+epoch: 14	loss: 0.028
+epoch: 15	loss: 0.028
+epoch: 16	loss: 0.028
+epoch: 17	loss: 0.028
+epoch: 18	loss: 0.028
+epoch: 19	loss: 0.028
+Performance model_1: {'loss': 26.223803505301476, 'acc': 0.99297225, 'precision_micro_avg': 0.36363636363636365, 'precision_macro_avg': 0.0004934007647711854, 'recall_micro_avg': 1.2881244585851885e-05, 'recall_macro_avg': 1.973029086986709e-07, 'f1_micro_avg': 2.576157660848844e-05, 'f1_macro_avg': 3.944480840497866e-07}
+
+
+> Model name: model_2
+Training the following model config: 
+ {'from': 'glove.6B.50d', 'rnn_config': {'type': 'lstm', 'embedding_dim': 50, 'params': {'hidden_size': 128, 'num_layers': 1}}, 'nn_config': {'in_features': 128}}
+epoch: 0	loss: 0.031
+epoch: 1	loss: 0.028
+epoch: 2	loss: 0.028
+epoch: 3	loss: 0.028
+epoch: 4	loss: 0.028
+epoch: 5	loss: 0.028
+epoch: 6	loss: 0.028
+epoch: 7	loss: 0.028
+epoch: 8	loss: 0.028
+epoch: 9	loss: 0.028
+epoch: 10	loss: 0.028
+epoch: 11	loss: 0.028
+epoch: 12	loss: 0.028
+epoch: 13	loss: 0.028
+epoch: 14	loss: 0.028
+epoch: 15	loss: 0.028
+epoch: 16	loss: 0.028
+epoch: 17	loss: 0.028
+epoch: 18	loss: 0.028
+epoch: 19	loss: 0.028
+Performance model_2: {'loss': 26.152784138917923, 'acc': 0.9929665, 'precision_micro_avg': 0.0, 'precision_macro_avg': 0.0, 'recall_micro_avg': 0.0, 'recall_macro_avg': 0.0, 'f1_micro_avg': 0.0, 'f1_macro_avg': 0.0}
+
+
+> Model name: model_3
+Training the following model config: 
+ {'from': 'glove.6B.200d', 'rnn_config': {'type': 'gru', 'embedding_dim': 200, 'params': {'hidden_size': 128, 'num_layers': 1}}, 'nn_config': {'in_features': 128}}
+epoch: 0	loss: 0.031
+epoch: 1	loss: 0.028
+epoch: 2	loss: 0.028
+epoch: 3	loss: 0.028
+epoch: 4	loss: 0.028
+epoch: 5	loss: 0.028
+epoch: 6	loss: 0.028
+epoch: 7	loss: 0.028
+epoch: 8	loss: 0.028
+epoch: 9	loss: 0.028
+epoch: 10	loss: 0.028
+epoch: 11	loss: 0.028
+epoch: 12	loss: 0.028
+epoch: 13	loss: 0.028
+epoch: 14	loss: 0.028
+epoch: 15	loss: 0.028
+epoch: 16	loss: 0.028
+epoch: 17	loss: 0.028
+epoch: 18	loss: 0.028
+epoch: 19	loss: 0.028
+Performance model_3: {'loss': 26.22742510214448, 'acc': 0.992953, 'precision_micro_avg': 0.5, 'precision_macro_avg': 0.0006784260515603799, 'recall_micro_avg': 5.13838307930452e-05, 'recall_macro_avg': 7.850733609348771e-07, 'f1_micro_avg': 0.00010275710147906002, 'f1_macro_avg': 1.56833185117805e-06}

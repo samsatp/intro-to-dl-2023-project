@@ -1,0 +1,14 @@
+The following modules were not unloaded:
+  (Use "module --force purge" to unload all):
+
+  1) csc-tools
+/var/spool/slurmd/job15912465/slurm_script: line 15: pip: command not found
+NOTE: This module uses Apptainer (Singularity). Some commands execute inside
+the container (e.g. python3, pip3).
+
+Traceback (most recent call last):
+  File "/scratch/project_2002605/sathtran/intro-to-dl-2023-project/train_rnn.py", line 64, in <module>
+    loss = train(optimizer=optimizer, criterion=criterion, model=model, train_loader=train_loader, device=device)
+  File "/scratch/project_2002605/sathtran/intro-to-dl-2023-project/model.py", line 64, in train
+    output = model(inputs['x'].to(device), inputs['lengths'].to(device))
+AttributeError: 'list' object has no attribute 'to'

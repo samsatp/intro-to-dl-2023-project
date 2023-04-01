@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
-import glob, os, re
-
+import glob, os, re, json
+import pandas as pd
 from typing import List
 
 def preprocess_text(x: str):
@@ -13,6 +13,11 @@ def preprocess_text(x: str):
     x = re.sub(r"\s+", " ", x)
 
     return x
+
+def preprocess_text_series(text: pd.Series):
+    text = text.str.lower()
+    text = text.str.strip()
+    return text
 
 def parse_xml(files: List[os.PathLike]):
     """
@@ -35,8 +40,10 @@ def parse_xml(files: List[os.PathLike]):
     texts = []
     labels = []
 
-    for f in files:
-        with open(f, "r") as s:
+    for i, f in enumerate(files):
+        if i%1000 == 0:
+            print(f"\treading file: {i}")
+        with open(f, "r", encoding="ISO-8859-1") as s:
             xml = s.read()
         soup = BeautifulSoup(xml, features="xml")
 
@@ -49,10 +56,27 @@ def parse_xml(files: List[os.PathLike]):
             for t in soup.find('text').text.split('\n')
         ]).strip()
         texts.append(text)
-
+        
         # Extract code
         codes = soup.find_all("code")
         label = [code.attrs.get("code") for code in codes]
         labels.append(label)
-
+        
     return headlines, texts, labels
+
+def get_data(file, nrows=None):
+    # Load headlines, texts and labels
+    df = pd.read_csv(file, sep = '|', nrows=nrows)
+    if "headline" in df.columns:
+        df["headline"].fillna("", inplace=True)
+        df["text"].fillna("", inplace=True)
+        data = preprocess_text_series(df["headline"]) + " " + preprocess_text_series(df["text"])
+    else:
+        data = preprocess_text_series(df["text"])
+
+    labels = None
+    if 'label' in df.columns:
+        labels = df['label'].values
+        labels = [json.loads(item.replace("'", "\"")) for item in labels]
+
+    return data, labels

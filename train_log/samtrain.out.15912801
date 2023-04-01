@@ -1,0 +1,7 @@
+
+
+> Model name: model_1
+Training the following model config: 
+ {'from': 'data', 'rnn_config': {'type': 'rnn', 'embedding_dim': 50, 'params': {'hidden_size': 128, 'num_layers': 1}}, 'nn_config': {'in_features': 128}}
+Train on: cuda
+inputs type:  <class 'dict'>

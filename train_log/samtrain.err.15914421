@@ -1,0 +1,26 @@
+The following modules were not unloaded:
+  (Use "module --force purge" to unload all):
+
+  1) csc-tools
+/var/spool/slurmd/job15914421/slurm_script: line 14: pip: command not found
+NOTE: This module uses Apptainer (Singularity). Some commands execute inside
+the container (e.g. python3, pip3).
+
+Traceback (most recent call last):
+  File "/scratch/project_2002605/sathtran/intro-to-dl-2023-project/train_rnn.py", line 34, in <module>
+    train_loader, test_loader, NUM_CLASSES, dataset = get_dataloaders(
+  File "/scratch/project_2002605/sathtran/intro-to-dl-2023-project/data.py", line 199, in get_dataloaders
+    dataset = MultiLabelDataset.build_vocab_from_pretrain_emb(data, labels, tokenizer = tokenizer, pretrained_name=vocab_from, device=device)
+  File "/scratch/project_2002605/sathtran/intro-to-dl-2023-project/data.py", line 158, in build_vocab_from_pretrain_emb
+    pretrained_emb = torchtext.vocab.pretrained_aliases[pretrained_name]()
+  File "/usr/local/lib64/python3.9/site-packages/torchtext/vocab/vectors.py", line 220, in __init__
+    super(GloVe, self).__init__(name, url=url, **kwargs)
+  File "/usr/local/lib64/python3.9/site-packages/torchtext/vocab/vectors.py", line 59, in __init__
+    self.cache(name, cache, url=url, max_vectors=max_vectors)
+  File "/usr/local/lib64/python3.9/site-packages/torchtext/vocab/vectors.py", line 102, in cache
+    with zipfile.ZipFile(dest, "r") as zf:
+  File "/usr/lib64/python3.9/zipfile.py", line 1266, in __init__
+    self._RealGetContents()
+  File "/usr/lib64/python3.9/zipfile.py", line 1333, in _RealGetContents
+    raise BadZipFile("File is not a zip file")
+zipfile.BadZipFile: File is not a zip file
