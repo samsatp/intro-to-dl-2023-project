@@ -100,8 +100,8 @@ result_path = "results.csv"
 pd.DataFrame(results).to_csv(result_path, index = False)
 print("Results saved to", result_path)
 
-model_save_path = "pretrained/model"
-tokenizer_save_path = "pretrained/tokenizer"
+model_save_path = "bert_model/model"
+tokenizer_save_path = "bert_model/tokenizer"
 
 model.save_pretrained(model_save_path)
 tokenizer.save_pretrained(tokenizer_save_path)

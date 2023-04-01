@@ -60,13 +60,18 @@ class MultiLabelDataset(Dataset):
                  ):
 
         # Collect the unique labels
-        unique_labels = []
-        for e in labels:
-            unique_labels += e 
-        unique_labels = set(unique_labels)
-        self.index2label = dict(zip([i for i in range(len(unique_labels))], unique_labels))
-        self.label2index = {label: idx for idx, label in self.index2label.items()}
-        self.NUM_CLASSES = len(unique_labels)
+        if labels != None:
+            unique_labels = []
+            for e in labels:
+                unique_labels += e 
+            unique_labels = set(unique_labels)
+            self.index2label = dict(zip([i for i in range(len(unique_labels))], unique_labels))
+            self.label2index = {label: idx for idx, label in self.index2label.items()}
+            self.NUM_CLASSES = len(unique_labels)
+        else:
+            self.index2label = None
+            self.label2index = None
+            self.NUM_CLASSES = None
         self.data = data
         self.labels = labels
         self.tokenizer = tokenizer
@@ -111,10 +116,11 @@ class MultiLabelDataset(Dataset):
             item['attention_mask'] = encoded_texts['attention_mask'][0]
 
             # Convert the indexed labels to a PyTorch tensor
-            indexed_labels = [self.label2index[label] for label in self.labels[idx]]
-            indexed_bow = [int(idx in indexed_labels) for idx in range(self.NUM_CLASSES)]        
-            label_tensor = torch.tensor(indexed_bow).float()
-            item['labels'] = label_tensor
+            if self.labels != None:
+                indexed_labels = [self.label2index[label] for label in self.labels[idx]]
+                indexed_bow = [int(idx in indexed_labels) for idx in range(self.NUM_CLASSES)]        
+                label_tensor = torch.tensor(indexed_bow).float()
+                item['labels'] = label_tensor
             return item
         
         cls.__getitem__ = __getitem__
