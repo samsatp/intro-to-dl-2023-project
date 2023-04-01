@@ -48,7 +48,8 @@ def save_predictions(outputs):
     df.columns = label2index['label'].values
 
     # Get the filenames as index
-    df.index = pd.read_csv(test_data_path).index
+    df.index = pd.read_csv(test_data_path, sep = "|").index
+    df.index.name = 'Filename'
 
     # Save to a file
     df.to_csv("predictions.tsv", sep = "\t")
